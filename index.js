@@ -13,13 +13,13 @@ app.get("/", (req, res) => {
     res.sendFile(join(__dirname, '../index.html'));
 })
 
-io.on('connection',(socket) =>{
-    console.log("User connected");
+io.on('connection',(socket) =>{ 
+    io.emit('user connected',"New user joined");
     socket.on('chat message',(msg) => {
         io.emit('chat message',msg)
     })
     socket.on('disconnect',() =>{
-        console.log("User disconnected");
+        io.emit('user disconnected', "User left the chat");
     })
 })
 

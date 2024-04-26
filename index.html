@@ -81,14 +81,23 @@
         input.value = '';
       }
     });
-
+    socket.on('user connected',(msg) => {
+      addItem(msg);
+    })
+    socket.on('user disconnected',(msg) => {
+      addItem(msg);
+    })
 
     socket.on('chat message', function(msg) {
-      var item = document.createElement('li');
+     addItem(msg);
+    });
+
+    function addItem(msg){
+      let item = document.createElement('li');
       item.textContent = msg;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
-    });
+    }
   </script>
 </body>
 
