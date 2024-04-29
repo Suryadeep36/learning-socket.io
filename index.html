@@ -81,20 +81,33 @@
         input.value = '';
       }
     });
+    let username = prompt("Enter your username");
+    socket.emit('add new user',username);
     socket.on('user connected',(msg) => {
-      addItem(msg);
+      newUserAdd(msg);
     })
     socket.on('user disconnected',(msg) => {
-      addItem(msg);
+      newUserRemove(msg);
     })
 
-    socket.on('chat message', function(msg) {
-     addItem(msg);
+    socket.on('chat message', (msg)=> {
+      addItem(msg);
     });
-
+    function newUserAdd(msg){
+      let item = document.createElement('li');
+      item.textContent = `${msg.username} entered the chat.`;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+    function newUserRemove(msg){
+      let item = document.createElement('li');
+      item.textContent = `${msg.username} left the chat`;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
     function addItem(msg){
       let item = document.createElement('li');
-      item.textContent = msg;
+      item.textContent = `${msg.username} said: ${msg.message}`;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     }

@@ -8,19 +8,41 @@ const server = createServer(app);
 const __dirname = fileURLToPath(import.meta.url);
 const io = new Server(server);
 let port = process.env.PORT || 3000;
-
+let users = [];
 app.get("/", (req, res) => {
     res.sendFile(join(__dirname, '../index.html'));
 })
-
+function getUsernameById(userId) {
+    const user = users.find(user => user.id === userId);
+    return user ? user : {
+        username: "Unknown",
+        id: userId
+    };
+}
 io.on('connection',(socket) =>{ 
-    io.emit('user connected',"New user joined");
+    socket.on('add new user',(msg) => {
+        let newUser = {
+            username: msg,
+            id: socket.id
+        }
+        users.push(newUser);
+        let foundUser = getUsernameById(socket.id);
+        io.emit('user connected',foundUser)
+    })
     socket.on('chat message',(msg) => {
-        io.emit('chat message',msg)
+        let foundUser = getUsernameById(socket.id);
+        let msgInfo = {
+            username: foundUser.username,
+            id: foundUser.id,
+            message: msg
+        } 
+        io.emit('chat message',msgInfo)
     })
     socket.on('disconnect',() =>{
-        io.emit('user disconnected', "User left the chat");
+        let foundUser = getUsernameById(socket.id);
+        io.emit('user connected',foundUser);
     })
+    
 })
 
 server.listen(port, () => {
