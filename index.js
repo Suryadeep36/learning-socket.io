@@ -29,6 +29,17 @@ io.on('connection',(socket) =>{
         let foundUser = getUsernameById(socket.id);
         io.emit('user connected',foundUser)
     })
+
+    socket.on('typing',(msg) => {
+        let foundUser = getUsernameById(socket.id);
+        if(msg){
+            msg = `${foundUser.username} is typing`
+        }
+        else{
+            msg = "";
+        }
+        io.emit('typing', msg);
+    })
     socket.on('chat message',(msg) => {
         let foundUser = getUsernameById(socket.id);
         let msgInfo = {
