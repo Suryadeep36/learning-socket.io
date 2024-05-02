@@ -51,7 +51,7 @@ io.on('connection',(socket) =>{
     })
     socket.on('disconnect',() =>{
         let foundUser = getUsernameById(socket.id);
-        io.emit('user connected',foundUser);
+        io.emit('user disconnected',foundUser);
     })
     
 })
