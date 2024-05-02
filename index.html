@@ -94,6 +94,12 @@
     })
     socket.on('typing', (msg) => {
       let item = document.querySelector("#form > p");
+      if(msg.username == username){
+        item.textContent = `you left the chat.`;
+      }
+      else{
+        item.textContent = `${msg.username} left the chat.`;
+      }
       item.textContent = msg;
     })
     let username = prompt("Enter your username");
@@ -110,19 +116,35 @@
     });
     function newUserAdd(msg){
       let item = document.createElement('li');
-      item.textContent = `${msg.username} entered the chat.`;
+      if(msg.username == username){
+        item.textContent = `you joined the chat.`;
+      }
+      else{
+        item.textContent = `${msg.username} entered the chat.`;
+      }
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     }
     function newUserRemove(msg){
       let item = document.createElement('li');
-      item.textContent = `${msg.username} left the chat`;
+      if(msg.username == username){
+        item.textContent = `you left the chat.`;
+      }
+      else{
+        item.textContent = `${msg.username} left the chat.`;
+      }
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     }
     function addItem(msg){
       let item = document.createElement('li');
-      item.textContent = `${msg.username} said: ${msg.message}`;
+      if(msg.username == username){
+        item.textContent = `You: ${msg.message}`;
+      }
+      else{
+        console.log(msg)
+        item.textContent = `${msg.username}: ${msg.message}`;
+      }
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     }
