@@ -4,14 +4,13 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { Server } from 'socket.io';
 const app = express();
+
 const server = createServer(app);
 const __dirname = fileURLToPath(import.meta.url);
 const io = new Server(server);
 let port = process.env.PORT || 3000;
+app.set('view engine', 'ejs');
 let users = [];
-app.get("/", (req, res) => {
-    res.sendFile(join(__dirname, '../index.html'));
-})
 function getUsernameById(userId) {
     const user = users.find(user => user.id === userId);
     return user ? user : {
@@ -19,6 +18,15 @@ function getUsernameById(userId) {
         id: userId
     };
 }
+
+app.get("/", (req, res) => {
+    res.sendFile(join(__dirname, '../index.html'));
+})
+app.get("/users",(req ,res) => {
+    res.render('users',{
+        data: users
+    })
+})
 io.on('connection',(socket) =>{ 
     socket.on('add new user',(msg) => {
         let newUser = {
