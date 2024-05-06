@@ -15,7 +15,8 @@ function getUsernameById(userId) {
     const user = users.find(user => user.id === userId);
     return user ? user : {
         username: "Unknown",
-        id: userId
+        id: userId,
+        isOnline: true
     };
 }
 
@@ -31,7 +32,8 @@ io.on('connection',(socket) =>{
     socket.on('add new user',(msg) => {
         let newUser = {
             username: msg,
-            id: socket.id
+            id: socket.id,
+            isOnline: true
         }
         users.push(newUser);
         let foundUser = getUsernameById(socket.id);
@@ -59,6 +61,7 @@ io.on('connection',(socket) =>{
     })
     socket.on('disconnect',() =>{
         let foundUser = getUsernameById(socket.id);
+        foundUser.isOnline = false;
         io.emit('user disconnected',foundUser);
     })
     

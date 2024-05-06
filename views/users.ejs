@@ -7,9 +7,15 @@
 </head>
 <body>
     <h1>Here are all users</h1>
+    <h2>Total Users: <%= data.length %></h2>
     <% data.map((ele) => { %>
         <h2><%= ele.username %></h2>
         <h2><%= ele.id %></h2>
+        <% if(ele.isOnline) { %>
+            <h2 style="color: greenyellow;">Online</h2>
+        <%} else { %>
+            <h2 style="color: grey;">Offline</h2>
+        <% } %>
     <% }) %>
 </body>
 </html>
