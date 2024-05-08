@@ -71,14 +71,15 @@
     <p></p>
     <input id="input" autocomplete="off" /><button>Send</button>  
   </form>
-
+  
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    let username = prompt("Enter your username");
     let socket = io();
     let messages = document.getElementById('messages');
     let form = document.getElementById('form');
     let input = document.getElementById('input');
-
+    
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (input.value) {
@@ -102,7 +103,7 @@
       }
       item.textContent = msg;
     })
-    let username = prompt("Enter your username");
+    
     socket.emit('add new user',username);
     socket.on('user connected',(msg) => {
       newUserAdd(msg);
@@ -115,6 +116,7 @@
       addItem(msg);
     });
     function newUserAdd(msg){
+      console.log(msg);
       let item = document.createElement('li');
       if(msg.username == username){
         item.textContent = `you joined the chat.`;

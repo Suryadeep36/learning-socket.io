@@ -19,74 +19,83 @@ async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/test');
 }
 let users = [];
-function getUsernameById(userId) {
-    const user = users.find(user => user.id === userId);
-    return user ? user : {
-        username: "Unknown",
-        id: userId,
-        isOnline: true
-    };
+async function getUsernameById(userId) {
+    try{
+        let foundUser =  await User.findOne({
+            id: userId
+        })
+        if(foundUser){
+            return foundUser;
+        }
+        else{
+            return {
+                username: "Unknown",
+                id: userId,
+                isOnline: true
+            }; 
+        }
+    }
+    catch(e){
+        console.log("Error occurred while geting username ID: ", e);
+        return {
+            username: "Unknown",
+            id: userId,
+            isOnline: true
+        };
+    }
 }
 
 app.get("/", (req, res) => {
     res.sendFile(join(__dirname, '../index.html'));
 })
 app.get("/users",(req ,res) => {
-    res.render('users',{
-        data: users
+    User.find({}).then((userList) => {
+        res.render('users',{
+            data: userList
+        })
     })
 })
 io.on('connection',(socket) =>{ 
-    socket.on('add new user',(msg) => {
-        let newUser = {
+    socket.on('add new user', async (msg) => {
+        const newUser = new User({
             username: msg,
             id: socket.id,
             isOnline: true
-        }
-        users.push(newUser);
-        let foundUser = getUsernameById(socket.id);
-        io.emit('user connected',foundUser)
-
-        // let newUser = new User({
-        //     username: msg,
-        //     id: socket.id,
-        //     isOnline: true
-        // })
-        // newUser.save();
-        // console.log(socket.id);
-        // User.find({
-        //     id: socket.id
-        // }).then((foundUser) => {
-        //     console.log(foundUser);
-        //     io.emit('user connected',foundUser)
-        // })
+        })
+        await newUser.save();
+        getUsernameById(socket.id).then((foundUser) => {
+            io.emit('user connected',foundUser)
+        })
     })
 
     socket.on('typing',(msg) => {
-        let foundUser = getUsernameById(socket.id);
-        if(msg){
-            msg = `${foundUser.username} is typing`
-        }
-        else{
-            msg = "";
-        }
-        io.emit('typing', msg);
+        getUsernameById(socket.id).then((foundUser) => {
+            if(msg){
+                msg = `${foundUser.username} is typing`
+            }
+            else{
+                msg = "";
+            }
+            io.emit('typing', msg);
+        })
     })
     socket.on('chat message',(msg) => {
-        let foundUser = getUsernameById(socket.id);
-        let msgInfo = {
-            username: foundUser.username,
-            id: foundUser.id,
-            message: msg
-        } 
-        io.emit('chat message',msgInfo)
+        getUsernameById(socket.id).then((foundUser) => {
+            let msgInfo = {
+                username: foundUser.username,
+                id: foundUser.id,
+                message: msg
+            } 
+            io.emit('chat message',msgInfo)
+        })       
     })
     socket.on('disconnect',() =>{
-        let foundUser = getUsernameById(socket.id);
-        foundUser.isOnline = false;
-        io.emit('user disconnected',foundUser);
+        getUsernameById(socket.id).then((foundUser) => {
+            foundUser.isOnline = false;
+            foundUser.save();
+            io.emit('user disconnected',foundUser);
+        })
     })
-    
 })
 
 server.listen(port, () => {
