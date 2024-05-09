@@ -4,18 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users</title>
+    <style>
+        .box{
+            border-radius: 1rem;
+            border: solid black 0.2rem;
+            background-color: bisque;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Here are all users</h1>
+    <h1 style="text-align: center;">All users</h1>
     <h2>Total Users: <%= data.length %></h2>
     <% data.map((ele) => { %>
-        <h2><%= ele.username %></h2>
-        <h2><%= ele.id %></h2>
-        <% if(ele.isOnline) { %>
-            <h2 style="color: greenyellow;">Online</h2>
-        <%} else { %>
-            <h2 style="color: grey;">Offline</h2>
-        <% } %>
+        <div class="container box">
+            <% if(ele.username){ %>
+                <h2>Username: <%= ele.username %></h2>
+            <% }else { %>
+                <h2>Username: Unknown</h2>
+            <% } %>
+            <h2>Id: <%= ele.id %></h2>
+            <% if(ele.isOnline) { %>
+                <h2>Status: <span style="color: green;">Online</span></h2>
+            <%} else { %>
+                <h2>Status: <span style="color: grey;">Online</span></h2>
+            <% } %>
+        </div>
     <% }) %>
 </body>
 </html>
