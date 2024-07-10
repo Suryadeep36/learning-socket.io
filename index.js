@@ -1,10 +1,11 @@
 import express from 'express';
-import { createServer} from 'node:http'
+import { createServer } from 'node:http'
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 import User from './models/user.js';
+import bodyParser from 'body-parser';
 const app = express();
 
 const server = createServer(app);
@@ -12,13 +13,12 @@ const __dirname = fileURLToPath(import.meta.url);
 const io = new Server(server);
 let port = process.env.PORT || 3000;
 app.set('view engine', 'ejs');
-
+app.use(bodyParser.urlencoded({ extended: true }));
 main().catch(err => console.log(err));
 
 async function main() {
   await mongoose.connect('mongodb://127.0.0.1:27017/test');
 }
-let users = [];
 async function getUsernameById(userId) {
     try{
         let foundUser =  await User.findOne({
@@ -27,13 +27,13 @@ async function getUsernameById(userId) {
         if(foundUser){
             return foundUser;
         }
-        else{
-            return {
-                username: "Unknown",
-                id: userId,
-                isOnline: true
-            }; 
-        }
+        // else{
+        //     return {
+        //         username: "Unknown",
+        //         id: userId,
+        //         isOnline: true
+        //     }; 
+        // }
     }
     catch(e){
         console.log("Error occurred while geting username ID: ", e);
@@ -48,13 +48,14 @@ async function getUsernameById(userId) {
 app.get("/", (req, res) => {
     res.sendFile(join(__dirname, '../index.html'));
 })
-app.get("/users",(req ,res) => {
-    User.find({}).then((userList) => {
+app.get("/users", async (req ,res) => {
+    await User.find({}).then((userList) => {
         res.render('users',{
             data: userList
         })
     })
 })
+
 io.on('connection',(socket) =>{ 
     socket.on('add new user', async (msg) => {
         const newUser = new User({
@@ -91,10 +92,20 @@ io.on('connection',(socket) =>{
     })
     socket.on('disconnect',() =>{
         getUsernameById(socket.id).then((foundUser) => {
-            foundUser.isOnline = false;
-            foundUser.save();
-            io.emit('user disconnected',foundUser);
+            if(foundUser){
+                foundUser.isOnline = false;
+                try{
+                    foundUser.save();
+                }
+                catch(e){
+                    console.log(e);
+                }
+                io.emit('user disconnected',foundUser);
+            }         
         })
+    })
+    socket.on('private message', (obj) => {
+        io.emit('send msg',obj);
     })
 })
 

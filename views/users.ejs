@@ -27,9 +27,30 @@
             <% if(ele.isOnline) { %>
                 <h2>Status: <span style="color: green;">Online</span></h2>
             <%} else { %>
-                <h2>Status: <span style="color: grey;">Online</span></h2>
+                <h2>Status: <span style="color: grey;">Offline</span></h2>
+            <% } %>
+            <% if(ele.isOnline) { %>
+                    <h2>send a message to <%=ele.username ? ele.username :"Unknown" %></h2>
+                    <input type="text" name="msg" class="msg" placeholder="enter your message">
+                    <button type="submit" class="sendBtn">Send</button>
             <% } %>
         </div>
     <% }) %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+        let data = JSON.parse('<%- JSON.stringify(data) %>');
+        let btn = document.getElementsByClassName("sendBtn");
+        let input = document.getElementsByClassName('msg');
+        Array.from(btn).map((ele, i) => {
+            ele.addEventListener('click', () => {
+                let msg = input[i].value;
+                socket.emit("private message", {
+                    receiver: data[i].id,
+                    msg
+                })
+            })
+        })
+    </script>
 </body>
 </html>

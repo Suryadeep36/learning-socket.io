@@ -115,8 +115,13 @@
     socket.on('chat message', (msg)=> {
       addItem(msg);
     });
+
+    socket.on('send msg', (msg)=>{
+      if(msg.receiver == socket.id){
+        alert(`Someone sent you: ${msg.msg}`)
+      }
+    })
     function newUserAdd(msg){
-      console.log(msg);
       let item = document.createElement('li');
       if(msg.username == username){
         item.textContent = `you joined the chat.`;
@@ -144,7 +149,6 @@
         item.textContent = `You: ${msg.message}`;
       }
       else{
-        console.log(msg)
         item.textContent = `${msg.username}: ${msg.message}`;
       }
       messages.appendChild(item);
